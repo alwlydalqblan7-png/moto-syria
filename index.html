@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>موتو سوريا 🏍️</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Tahoma,sans-serif;
+    background:#f5f6f8;
+    color:#222;
+}
+
+/* =========================
+   واجهة الموقع
+========================= */
+
+.hero{
+    position:relative;
+    width:100%;
+    max-width:1100px;
+    margin:15px auto 25px;
+    padding:0 12px;
+}
+
+.hero-image{
+    width:100%;
+    height:450px;
+    display:block;
+    object-fit:cover;
+    object-position:center;
+    border-radius:28px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+    background:#222;
+}
+
+.hero-overlay{
+    position:absolute;
+    top:0;
+    right:12px;
+    left:12px;
+    bottom:0;
+    border-radius:28px;
+
+    background:linear-gradient(
+        to top,
+        rgba(0,0,0,.85),
+        rgba(0,0,0,.35) 50%,
+        rgba(0,0,0,.05)
+    );
+}
+
+.hero-content{
+    position:absolute;
+    right:45px;
+    left:45px;
+    bottom:38px;
+    color:white;
+    text-align:right;
+}
+
+.hero-title{
+    margin:0 0 8px;
+    font-size:48px;
+    font-weight:900;
+    text-shadow:0 4px 12px rgba(0,0,0,.7);
+}
+
+.hero-subtitle{
+    margin:0;
+    font-size:21px;
+    line-height:1.6;
+    text-shadow:0 2px 8px rgba(0,0,0,.7);
+}
+
+.hero-badge{
+    display:inline-block;
+    margin-top:15px;
+    padding:9px 18px;
+    border-radius:30px;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.45);
+    backdrop-filter:blur(8px);
+    font-size:15px;
+    font-weight:bold;
+}
+
+/* =========================
+   زر إضافة إعلان
+========================= */
+
+.add-button-container{
+    text-align:center;
+    margin:20px 15px 25px;
+}
+
+.add-button{
+    display:inline-block;
+    padding:15px 28px;
+    border-radius:14px;
+    text-decoration:none;
+    font-size:17px;
+    font-weight:bold;
+    background:#198754;
+    color:white;
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+
+/* =========================
+   البحث
+========================= */
+
+.search-box{
+    width:100%;
+    max-width:600px;
+    margin:20px auto;
+    padding:0 15px;
+}
+
+.search-input{
+    width:100%;
+    padding:17px;
+    border:2px solid #ddd;
+    border-radius:15px;
+    background:white;
+    font-size:17px;
+    outline:none;
+}
+
+.search-input:focus{
+    border-color:#198754;
+}
+
+/* =========================
+   عنوان الإعلانات
+========================= */
+
+.ads-title{
+    text-align:center;
+    margin:30px 15px 20px;
+    font-size:28px;
+}
+
+/* =========================
+   الإعلانات
+========================= */
+
+.ads-grid{
+    width:100%;
+    max-width:700px;
+    margin:20px auto;
+    padding:0 15px;
+}
+
+.ad-card{
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,.10);
+}
+
+.gallery{
+    width:100%;
+    overflow:hidden;
+}
+
+.gallery-image{
+    width:100%;
+    height:350px;
+    object-fit:cover;
+    display:block;
+}
+
+.no-image{
+    height:350px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#eee;
+    font-size:70px;
+}
+
+.thumbnails{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:10px;
+    background:#f7f7f7;
+}
+
+.thumbnail{
+    width:65px;
+    height:65px;
+    min-width:65px;
+    object-fit:cover;
+    border-radius:9px;
+    border:2px solid #ddd;
+    cursor:pointer;
+}
+
+.ad-content{
+    padding:20px;
+}
+
+.ad-name{
+    margin:0 0 10px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.ad-price{
+    background:#f5f5f5;
+    border-radius:12px;
+    padding:13px;
+    margin:10px 0;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.ad-info{
+    color:#555;
+    line-height:1.8;
+    margin:12px 0 18px;
+}
+
+.ad-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.ad-button{
+    border:0;
+    border-radius:10px;
+    padding:13px 8px;
+    font-size:15px;
+    font-weight:bold;
+    text-decoration:none;
+    text-align:center;
+    cursor:pointer;
+}
+
+.whatsapp-button{
+    background:#25D366;
+    color:white;
+    grid-column:1/-1;
+}
+
+.edit-button{
+    background:#ffc107;
+    color:black;
+}
+
+.delete-button{
+    background:#dc3545;
+    color:white;
+}
+
+.empty{
+    text-align:center;
+    padding:50px 20px;
+    background:white;
+    border-radius:18px;
+}
+
+.loading{
+    text-align:center;
+    padding:50px 20px;
+    font-weight:bold;
+}
+
+/* =========================
+   الموبايل
+========================= */
+
+@media(max-width:600px){
+
+    .hero{
+        margin:10px auto 20px;
+        padding:0 10px;
+    }
+
+    .hero-image{
+        height:330px;
+        border-radius:22px;
+    }
+
+    .hero-overlay{
+        right:10px;
+        left:10px;
+        border-radius:22px;
+    }
+
+    .hero-content{
+        right:25px;
+        left:25px;
+        bottom:25px;
+    }
+
+    .hero-title{
+        font-size:32px;
+    }
+
+    .hero-subtitle{
+        font-size:16px;
+    }
+
+    .hero-badge{
+        font-size:13px;
+        padding:8px 13px;
+    }
+
+    .ads-title{
+        font-size:23px;
+    }
+
+    .gallery-image,
+    .no-image{
+        height:280px;
+    }
+
+    .ad-name{
+        font-size:21px;
+    }
+
+    .ad-price{
+        font-size:18px;
+    }
+}
+
+@media(min-width:1000px){
+
+    .hero-image{
+        height:500px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- =========================
+     واجهة الموقع
+========================= -->
+
+<header class="hero">
+
+    <img
+        src="moto1.jpg"
+        alt="موتو سوريا"
+        class="hero-image"
+    >
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+
+        <h1 class="hero-title">
+            🏍️ موتو سوريا
+        </h1>
+
+        <p class="hero-subtitle">
+            سوق الدراجات النارية في سوريا
+        </p>
+
+        <span class="hero-badge">
+            🔥 بيع • شراء • تبديل
+        </span>
+
+    </div>
+
+</header>
+
+
+<main>
+
+<!-- زر إضافة إعلان -->
+
+<div class="add-button-container">
+
+    <a
+        href="add.html"
+        class="add-button"
+    >
+        ➕ إضافة إعلان جديد
+    </a>
+
+</div>
+
+
+<!-- البحث -->
+
+<div class="search-box">
+
+    <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="🔍 ابحث عن دراجة..."
+    >
+
+</div>
+
+
+<h2 class="ads-title">
+    🏍️ الدراجات المعروضة للبيع
+</h2>
+
+
+<!-- الإعلانات -->
+
+<div
+    id="adsContainer"
+    class="ads-grid"
+>
+
+    <div class="loading">
+        ⏳ جاري تحميل الإعلانات...
+    </div>
+
+</div>
+
+</main>
+
+
+<script>
+
+/* =========================
+   Supabase
+========================= */
+
+const SUPABASE_URL =
+"https://vfqsaylyokckxobrslvb.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_4s_UaWxuR3Hyc0WFfk0yHQ_8oL9rHwg";
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+const adsContainer =
+document.getElementById("adsContainer");
+
+const searchInput =
+document.getElementById("searchInput");
+
+
+/* =========================
+   حماية النصوص
+========================= */
+
+function escapeHTML(value){
+
+    return String(value || "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* =========================
+   الصور
+========================= */
+
+function getImages(ad){
+
+    if(
+        Array.isArray(ad.images) &&
+        ad.images.length > 0
+    ){
+
+        return ad.images;
+
+    }
+
+    return [];
+
+}
+
+
+/* =========================
+   تحميل الإعلانات
+========================= */
+
+async function showAds(searchText = ""){
+
+    adsContainer.innerHTML = `
+
+        <div class="loading">
+            ⏳ جاري تحميل الإعلانات...
+        </div>
+
+    `;
+
+    try{
+
+        let query =
+            supabaseClient
+                .from("ads")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending:false
+                    }
+                );
+
+
+        const search =
+            String(searchText).trim();
+
+
+        if(search){
+
+            query =
+                query.or(
+                    `name.ilike.%${search}%,price.ilike.%${search}%,info.ilike.%${search}%`
+                );
+
+        }
+
+
+        const {
+            data,
+            error
+        } = await query;
+
+
+        console.log("ADS DATA:",data);
+        console.log("ADS ERROR:",error);
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        const ads =
+            data || [];
+
+
+        if(ads.length === 0){
+
+            adsContainer.innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        📭 لا توجد إعلانات
+                    </h3>
+
+                    <p>
+                        جدول الإعلانات فارغ.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        adsContainer.innerHTML = "";
+
+
+        ads.forEach(function(ad){
+
+            const images =
+                getImages(ad);
+
+
+            const firstImage =
+                images.length > 0
+                ? images[0]
+                : "";
+
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "ad-card";
+
+
+            let imageHTML = "";
+
+
+            if(firstImage){
+
+                imageHTML = `
+
+                    <img
+                        src="${escapeHTML(firstImage)}"
+                        class="gallery-image"
+                        alt="صورة الدراجة"
+                        id="main-${ad.id}"
+                    >
+
+                `;
+
+            }else{
+
+                imageHTML = `
+
+                    <div class="no-image">
+                        🏍️
+                    </div>
+
+                `;
+
+            }
+
+
+            let thumbnailsHTML = "";
+
+
+            if(images.length > 1){
+
+                thumbnailsHTML = `
+
+                    <div class="thumbnails">
+
+                `;
+
+
+                images.forEach(function(image){
+
+                    thumbnailsHTML += `
+
+                        <img
+                            src="${escapeHTML(image)}"
+                            class="thumbnail"
+                            alt="صورة الدراجة"
+                            onclick="
+                                document.getElementById(
+                                    'main-${ad.id}'
+                                ).src=this.src
+                            "
+                        >
+
+                    `;
+
+                });
+
+
+                thumbnailsHTML += `
+
+                    </div>
+
+                `;
+
+            }
+
+
+            const whatsapp =
+                String(
+                    ad.whatsapp || ""
+                ).replace(
+                    /\D/g,
+                    ""
+                );
+
+
+            card.innerHTML = `
+
+                <div class="gallery">
+
+                    ${imageHTML}
+
+                    ${thumbnailsHTML}
+
+                </div>
+
+
+                <div class="ad-content">
+
+                    <h2 class="ad-name">
+
+                        🏍️ ${
+                            escapeHTML(
+                                ad.name ||
+                                "دراجة"
+                            )
+                        }
+
+                    </h2>
+
+
+                    <div class="ad-price">
+
+                        💰 ${
+                            escapeHTML(
+                                ad.price ||
+                                "السعر غير محدد"
+                            )
+                        }
+
+                    </div>
+
+
+                    <div class="ad-info">
+
+                        📋 ${
+                            escapeHTML(
+                                ad.info ||
+                                "لا توجد معلومات إضافية"
+                            )
+                        }
+
+                    </div>
+
+
+                    <div class="ad-buttons">
+
+                        <a
+                            href="details.html?id=${encodeURIComponent(ad.id)}"
+                            class="ad-button"
+                            style="
+                                background:#222;
+                                color:white;
+                                grid-column:1/-1;
+                            "
+                        >
+                            📋 عرض تفاصيل الإعلان
+                        </a>
+
+
+                        ${
+                            whatsapp
+                            ?
+                            `
+                            <a
+                                href="https://wa.me/${whatsapp}"
+                                target="_blank"
+                                class="ad-button whatsapp-button"
+                            >
+                                📱 تواصل عبر واتساب
+                            </a>
+                            `
+                            :
+                            ""
+                        }
+
+
+                        <button
+                            class="ad-button edit-button"
+                            onclick="
+                                editAd('${ad.id}')
+                            "
+                        >
+                            ✏️ تعديل
+                        </button>
+
+
+                        <button
+                            class="ad-button delete-button"
+                            onclick="
+                                deleteAd('${ad.id}')
+                            "
+                        >
+                            🗑️ حذف
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            adsContainer.appendChild(card);
+
+        });
+
+
+    }catch(error){
+
+        console.error(
+            "SUPABASE ERROR:",
+            error
+        );
+
+
+        adsContainer.innerHTML = `
+
+            <div class="empty">
+
+                <h3>
+                    ❌ تعذر تحميل الإعلانات
+                </h3>
+
+                <p style="
+                    color:#d00;
+                    font-weight:bold;
+                    direction:ltr;
+                    word-break:break-word;
+                ">
+                    ${escapeHTML(
+                        error.message ||
+                        "خطأ غير معروف"
+                    )}
+                </p>
+
+                <button
+                    onclick="showAds()"
+                    style="
+                        margin-top:15px;
+                        padding:12px 20px;
+                        border:0;
+                        border-radius:10px;
+                        background:#198754;
+                        color:white;
+                        font-weight:bold;
+                    "
+                >
+                    🔄 إعادة المحاولة
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================
+   تعديل إعلان
+========================= */
+
+function editAd(id){
+
+    if(!id){
+
+        alert(
+            "❌ لم يتم العثور على رقم الإعلان"
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "add.html?edit=" +
+        encodeURIComponent(id);
+
+}
+
+
+/* =========================
+   حذف إعلان
+========================= */
+
+async function deleteAd(id){
+
+    const answer =
+        confirm(
+            "⚠️ هل أنت متأكد من حذف هذا الإعلان؟"
+        );
+
+
+    if(!answer){
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            error
+        } =
+        await supabaseClient
+            .from("ads")
+            .delete()
+            .eq("id",id);
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        alert(
+            "✅ تم حذف الإعلان"
+        );
+
+
+        showAds(
+            searchInput.value
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+
+        alert(
+            "❌ لم يتم حذف الإعلان\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================
+   البحث
+========================= */
+
+searchInput.addEventListener(
+    "input",
+    function(){
+
+        showAds(
+            this.value
+        );
+
+    }
+);
+
+
+/* =========================
+   تشغيل الموقع
+========================= */
+
+showAds();
+
+</script>
+
+</body>
+</html>

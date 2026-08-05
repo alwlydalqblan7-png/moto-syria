@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>اختبار الصورة</title>
+
+</head>
+
+<body>
+
+<h2>🧪 اختبار اختيار الصورة</h2>
+
+<input
+    type="file"
+    id="testImage"
+    accept="image/*"
+>
+
+<p id="result">
+لم يتم اختيار صورة
+</p>
+
+<img
+    id="preview"
+    style="
+        width:200px;
+        height:200px;
+        object-fit:cover;
+        display:none;
+    "
+>
+
+<script>
+
+const input =
+document.getElementById("testImage");
+
+const result =
+document.getElementById("result");
+
+const preview =
+document.getElementById("preview");
+
+
+input.addEventListener(
+    "change",
+    function() {
+
+        console.log(
+            "FILES:",
+            this.files
+        );
+
+        console.log(
+            "LENGTH:",
+            this.files.length
+        );
+
+
+        if (
+            this.files &&
+            this.files.length > 0
+        ) {
+
+            const file =
+            this.files[0];
+
+
+            result.textContent =
+            "✅ نجح الاختبار: " +
+            file.name;
+
+
+            preview.src =
+            URL.createObjectURL(file);
+
+            preview.style.display =
+            "block";
+
+        }
+
+        else {
+
+            result.textContent =
+            "❌ لم تصل الصورة";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>تفاصيل الإعلان - موتو سوريا 🏍️</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+
+.details-page {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 0 12px 40px;
+}
+
+.details-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+.main-image {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+}
+
+.no-image {
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eeeeee;
+    font-size: 70px;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px;
+    background: #f7f7f7;
+}
+
+.thumbnail {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    cursor: pointer;
+}
+
+.details-content {
+    padding: 20px;
+}
+
+.details-title {
+    margin: 0 0 15px;
+    font-size: 26px;
+}
+
+.price {
+    background: #f5f5f5;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 21px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.info-box {
+    line-height: 1.9;
+    color: #444;
+}
+
+.info-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-row strong {
+    color: #222;
+}
+
+.whatsapp {
+    display: block;
+    text-align: center;
+    background: #25D366;
+    color: white;
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 11px;
+    margin-top: 20px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.back {
+    display: block;
+    text-align: center;
+    background: #222;
+    color: white;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 11px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+</style></head><body><header><h1>🏍️ موتو سوريا</h1><p>تفاصيل الدراجة</p></header><main class="details-page"><a
+href="index.html"
+class="back"
+
+«»
+
+⬅️ العودة إلى الإعلانات
+</a>
+
+<div
+id="detailsContainer"
+class="details-card"
+><div class="loading">
+⏳ جاري تحميل تفاصيل الإعلان...
+</div></div></main><script>
+
+
+/* ==============================
+   Supabase
+============================== */
+
+const SUPABASE_URL =
+"https://vfqsaylyokckxobrslvb.supabase.co";
+
+
+const SUPABASE_KEY =
+"sb_publishable_4s_UaWxuR3Hyc0WFfk0yHQ_8oL9rHwg";
+
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+/* ==============================
+   العناصر
+============================== */
+
+const container =
+document.getElementById(
+    "detailsContainer"
+);
+
+
+/* ==============================
+   ID الإعلان
+============================== */
+
+const params =
+new URLSearchParams(
+    window.location.search
+);
+
+
+const adId =
+params.get("id");
+
+
+/* ==============================
+   الصور
+============================== */
+
+function getImages(ad) {
+
+    if (
+        Array.isArray(ad.images) &&
+        ad.images.length > 0
+    ) {
+
+        return ad.images;
+
+    }
+
+    return [];
+
+}
+
+
+/* ==============================
+   حماية النص
+============================== */
+
+function escapeHTML(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* ==============================
+   تغيير الصورة
+============================== */
+
+function changeImage(src) {
+
+    const mainImage =
+    document.getElementById(
+        "mainImage"
+    );
+
+
+    if (mainImage) {
+
+        mainImage.src = src;
+
+    }
+
+}
+
+
+/* ==============================
+   عرض الخطأ
+============================== */
+
+function showError(text) {
+
+    container.innerHTML = `
+
+        <div class="error">
+
+            <h2>❌ ${escapeHTML(text)}</h2>
+
+            <p>
+            ربما تم حذف الإعلان أو أن الرابط غير صحيح.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ==============================
+   تحميل التفاصيل من Supabase
+============================== */
+
+async function showDetails() {
+
+
+    if (!adId) {
+
+        showError(
+            "الإعلان غير موجود"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const { data: ad, error } =
+        await supabaseClient
+        .from("ads")
+        .select("*")
+        .eq("id", adId)
+        .single();
+
+
+        if (error) {
+
+            console.error(error);
+
+            throw error;
+
+        }
+
+
+        if (!ad) {
+
+            showError(
+                "الإعلان غير موجود"
+            );
+
+            return;
+
+        }
+
+
+        const images =
+        getImages(ad);
+
+
+        /* ==============================
+           معرض الصور
+        ============================== */
+
+        let galleryHTML = "";
+
+
+        if (images.length > 0) {
+
+
+            galleryHTML = `
+
+                <img
+                    id="mainImage"
+                    src="${escapeHTML(images[0])}"
+                    class="main-image"
+                    alt="صورة الدراجة"
+                    onerror="this.style.display='none';"
+                >
+
+            `;
+
+
+            if (images.length > 1) {
+
+
+                galleryHTML += `
+
+                    <div class="thumbnails">
+
+                `;
+
+
+                images.forEach(
+                    function(image, index) {
+
+                        galleryHTML += `
+
+                            <img
+                                src="${escapeHTML(image)}"
+                                class="thumbnail"
+                                alt="صورة ${index + 1}"
+                                onclick="changeImage(this.src)"
+                            >
+
+                        `;
+
+                    }
+                );
+
+
+                galleryHTML += `
+
+                    </div>
+
+                `;
+
+            }
+
+
+        } else {
+
+
+            galleryHTML = `
+
+                <div class="no-image">
+                    🏍️
+                </div>
+
+            `;
+
+        }
+
+
+        /* ==============================
+           واتساب
+        ============================== */
+
+        const whatsapp =
+        String(ad.whatsapp || "")
+        .replace(/\D/g, "");
+
+
+        /* ==============================
+           عرض الإعلان
+        ============================== */
+
+        container.innerHTML = `
+
+            <div>
+
+                ${galleryHTML}
+
+            </div>
+
+
+            <div class="details-content">
+
+
+                <h2 class="details-title">
+
+                    🏍️
+                    ${escapeHTML(
+                        ad.name || "دراجة"
+                    )}
+
+                </h2>
+
+
+                <div class="price">
+
+                    💰
+                    ${escapeHTML(
+                        ad.price ||
+                        "السعر غير محدد"
+                    )}
+
+                </div>
+
+
+                <div class="info-box">
+
+
+                    <div class="info-row">
+
+                        📋
+                        <strong>
+                        تفاصيل الإعلان:
+                        </strong>
+
+                        <br>
+
+                        ${escapeHTML(
+                            ad.info ||
+                            "لا توجد تفاصيل إضافية"
+                        )}
+
+                    </div>
+
+
+                </div>
+
+
+                ${
+                    whatsapp
+                    ?
+                    `
+
+                    <a
+                        href="https://wa.me/${whatsapp}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="whatsapp"
+                    >
+
+                        📱 تواصل مع صاحب الإعلان عبر واتساب
+
+                    </a>
+
+                    `
+                    :
+                    ""
+                }
+
+
+            </div>
+
+        `;
+
+
+    } catch(error) {
+
+
+        console.error(
+            "Details error:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                <h2>
+                    ❌ تعذر تحميل الإعلان
+                </h2>
+
+                <p>
+                    ${escapeHTML(
+                        error.message ||
+                        "حدث خطأ غير معروف"
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ==============================
+   تشغيل
+============================== */
+
+showDetails();
+
+
+</script></body></html>

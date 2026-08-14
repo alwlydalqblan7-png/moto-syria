@@ -1,0 +1,69 @@
+name: Build Wafferha Final Signed APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract Android project
+        run: unzip -q -o Wafferha-Android-Project.zip
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Decode signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.WAFFERHA_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/wafferha-upload-key.jks"
+
+      - name: Build Release APK
+        run: gradle -p android assembleRelease --stacktrace
+
+      - name: Sign APK
+        env:
+          WAFFERHA_STORE_PASSWORD: ${{ secrets.WAFFERHA_STORE_PASSWORD }}
+          WAFFERHA_KEY_ALIAS: ${{ secrets.WAFFERHA_KEY_ALIAS }}
+          WAFFERHA_KEY_PASSWORD: ${{ secrets.WAFFERHA_KEY_PASSWORD }}
+        run: |
+          UNSIGNED="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED="android/app/build/outputs/apk/release/app-release-aligned.apk"
+          SIGNED="android/app/build/outputs/apk/release/Wafferha-release.apk"
+
+          zipalign -f -p 4 "$UNSIGNED" "$ALIGNED"
+
+          apksigner sign \
+            --ks "$GITHUB_WORKSPACE/wafferha-upload-key.jks" \
+            --ks-key-alias "$WAFFERHA_KEY_ALIAS" \
+            --ks-pass env:WAFFERHA_STORE_PASSWORD \
+            --key-pass env:WAFFERHA_KEY_PASSWORD \
+            --out "$SIGNED" \
+            "$ALIGNED"
+
+          apksigner verify --verbose "$SIGNED"
+
+      - name: Upload final signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wafferha-Final-Signed-APK
+          path: android/app/build/outputs/apk/release/Wafferha-release.apk
+          if-no-files-found: error

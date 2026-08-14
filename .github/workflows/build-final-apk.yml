@@ -48,10 +48,11 @@ jobs:
           UNSIGNED="android/app/build/outputs/apk/release/app-release-unsigned.apk"
           ALIGNED="android/app/build/outputs/apk/release/app-release-aligned.apk"
           SIGNED="android/app/build/outputs/apk/release/Wafferha-release.apk"
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.0"
 
-          zipalign -f -p 4 "$UNSIGNED" "$ALIGNED"
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED" "$ALIGNED"
 
-          apksigner sign \
+          "$BUILD_TOOLS/apksigner" sign \
             --ks "$GITHUB_WORKSPACE/wafferha-upload-key.jks" \
             --ks-key-alias "$WAFFERHA_KEY_ALIAS" \
             --ks-pass env:WAFFERHA_STORE_PASSWORD \
@@ -59,7 +60,7 @@ jobs:
             --out "$SIGNED" \
             "$ALIGNED"
 
-          apksigner verify --verbose "$SIGNED"
+          "$BUILD_TOOLS/apksigner" verify --verbose "$SIGNED"
 
       - name: Upload final signed APK
         uses: actions/upload-artifact@v4
